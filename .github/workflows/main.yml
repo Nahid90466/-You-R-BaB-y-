@@ -1,11 +1,7 @@
-const login = require('@xaviabot/fca-unofficial');
+const login = require('@xaviabot/fca-unofficial'); // অথবা আপনি যেটা ব্যবহার করছেন
 const fs = require('fs');
 
-// সরাসরি কোডে ইমেইল ও পাসওয়ার্ড বসানো হয়েছে
-const credentials = {
-  email: "mdsabbira0011@gmail.com",
-  password: "SABBIRVAI1122"
-};
+const credentials = { email: process.env.FB_EMAIL, password: process.env.FB_PASSWORD };
 
 login(credentials, (err, api) => {
   if (err) {
@@ -21,12 +17,17 @@ login(credentials, (err, api) => {
 
   console.log("✅ Login Success");
 
-  // Session file সংরক্ষণ
+  // Check if api or api.cv exists
+  if (!api || !api.cv) {
+    console.error("❌ API object বা তার cv property undefined");
+    return;
+  }
+
+  // Save session
   fs.writeFileSync('appstate.json', JSON.stringify(api.getAppState()));
 
-  // মেসেজ শোনা শুরু
   api.listenMqtt((err, message) => {
-    if (err) return console.error("🔴 Listen Error:", err);
+    if (err) return console.error("Listen Error:", err);
     console.log("🔔 New Message:", message);
   });
 });
